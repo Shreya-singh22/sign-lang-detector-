@@ -6,7 +6,8 @@ import threading
 import time
 import logging
 import os
-from flask import Flask, render_template, jsonify, Response
+import base64
+from flask import Flask, render_template, jsonify, Response, request
 
 app = Flask(__name__)
 
@@ -60,24 +61,33 @@ def clear_text():
     predicted_text = ""  # Reset the predicted text
     return jsonify({"status": "success"})
 
-def gen_frames():
+@app.route('/process_frame', methods=['POST'])
+def process_frame():
     global predicted_text, last_detected_character, fixed_character, delayCounter, start_time
 
-    cap = cv2.VideoCapture(0)
+    try:
+        data = request.json
+        if not data or 'image' not in data:
+            return jsonify({'error': 'No image provided'}), 400
+        
+        # Decode the base64 image
+        image_data = data['image']
+        if ',' in image_data:
+            image_data = image_data.split(',')[1]
+        image_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    while True:
-        data_aux = []
-        x_ = []
-        y_ = []
-
-        ret, frame = cap.read()
-
-        if not ret:
-            break
+        if frame is None:
+            return jsonify({'error': 'Invalid image'}), 400
 
         H, W, _ = frame.shape
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)
+
+        data_aux = []
+        x_ = []
+        y_ = []
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
@@ -116,7 +126,7 @@ def gen_frames():
                 if predicted_index in labels_dict:
                     predicted_character = labels_dict[predicted_index]
                 else:
-                    predicted_character = None  # Ignore invalid predictions
+                    predicted_character = None
 
                 # Draw a rectangle and the predicted character on the frame
                 if predicted_character:
@@ -137,22 +147,18 @@ def gen_frames():
                         # Reset the timer when a new character is detected
                         start_time = current_time
                         last_detected_character = predicted_character
-                        delayCounter = 0  # Reset delay counter for a new character
+                        delayCounter = 0
 
-        # Encode frame as JPEG and yield as MJPEG stream
+        # Encode frame back to base64
         ret, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
-    cap.release()
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-# Start the camera in a separate thread
-threading.Thread(target=gen_frames, daemon=True).start()
+        encoded_image = base64.b64encode(buffer).decode('utf-8')
+        
+        return jsonify({
+            'image': 'data:image/jpeg;base64,' + encoded_image,
+            'prediction': predicted_text
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)
