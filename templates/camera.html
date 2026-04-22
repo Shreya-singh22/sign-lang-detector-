@@ -232,7 +232,7 @@
         </div>
 
         <div class="video-container">
-            <video id="webcam" autoplay playsinline style="display: none;"></video>
+            <video id="webcam" autoplay playsinline style="width: 100%; max-width: 800px; border-radius: 15px; border: 3px solid #e2e8f0; margin: 0 auto; display: block;"></video>
             <canvas id="canvas" style="display: none;"></canvas>
             <img id="video-feed" src="" alt="Camera Feed" style="display: none; width: 100%; max-width: 800px; border-radius: 15px; border: 3px solid #e2e8f0; margin: 0 auto;">
             <div id="camera-error" style="display: none; text-align: center; padding: 20px; color: #e53e3e;">
@@ -324,6 +324,7 @@
                         videoFeed.src = data.image;
                         if(videoFeed.style.display === 'none') {
                             videoFeed.style.display = 'block';
+                            video.style.display = 'none'; // Hide raw webcam
                         }
                     }
                     
