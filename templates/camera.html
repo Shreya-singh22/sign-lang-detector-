@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Prediction - Camera</title>
+    <title>ASL Detection - Camera</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Montserrat', sans-serif;
@@ -25,201 +21,177 @@
 
         .navbar {
             background: rgba(255, 255, 255, 0.9);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
             padding: 15px 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
+        .navbar-brand { font-weight: 700; font-size: 24px; color: #1a202c !important; }
+        .nav-link { color: #4a5568 !important; font-weight: 500; transition: all 0.3s; }
+        .nav-link:hover { color: #2d3748 !important; transform: translateY(-1px); }
+        .nav-link.active { color: #4a90e2 !important; font-weight: 600; }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 24px;
-            color: #1a202c !important;
+        .container-main { max-width: 1100px; margin: 0 auto; }
+
+        .page-title { text-align: center; margin-bottom: 24px; }
+        .page-title h1 { font-size: 40px; font-weight: 800; color: #1a202c; margin-bottom: 6px; }
+        .page-title p { font-size: 16px; color: #718096; }
+
+        /* Status bar */
+        .status-bar {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px; border-radius: 10px;
+            margin-bottom: 16px; font-size: 13px; font-weight: 600;
+            transition: all 0.3s;
+        }
+        .status-bar.connecting { background: #fff3cd; color: #856404; }
+        .status-bar.active { background: #d1fae5; color: #065f46; }
+        .status-bar.error { background: #fee2e2; color: #991b1b; }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-bar.connecting .status-dot { background: #f59e0b; animation: pulse 1s infinite; }
+        .status-bar.active .status-dot { background: #10b981; }
+        .status-bar.error .status-dot { background: #ef4444; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .status-dot { will-change: opacity; }
+
+        /* Layout */
+        .camera-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
         }
 
-        .navbar-toggler {
-            border: 2px solid #e2e8f0;
+        /* Video panel */
+        .video-panel {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px; padding: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2842, 55, 72, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-        }
-
-        .nav-link {
-            color: #4a5568 !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #2d3748 !important;
-            transform: translateY(-1px);
-        }
-
-        .nav-link.active {
-            color: #4a90e2 !important;
-            font-weight: 600;
-        }
-
-        .container-main {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page-title {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
-
-        .page-title h1 {
-            font-size: 48px;
-            font-weight: 800;
-            color: #1a202c;
-            margin-bottom: 10px;
-        }
-
-        .page-title p {
-            font-size: 18px;
-            color: #4a5568;
-            font-weight: 400;
-        }
-
-        .video-container {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        #video-feed {
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        .video-wrap { position: relative; }
+        #webcam, #video-feed {
+            width: 100%; border-radius: 12px;
             border: 3px solid #e2e8f0;
+            display: block;
         }
-
-        .prediction-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        #video-feed { display: none; }
+        #canvas { display: none; }
+        #camera-error {
+            display: none; padding: 30px; text-align: center; color: #e53e3e;
+            background: #fff5f5; border-radius: 12px;
         }
+        #camera-error ul { text-align: left; display: inline-block; margin-top: 10px; }
 
-        .prediction-label {
-            font-size: 16px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        /* Side panel */
+        .side-panel { display: flex; flex-direction: column; gap: 16px; }
 
-        #prediction {
-            font-size: 36px;
-            font-weight: 700;
-            min-height: 60px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 15px;
-            border: 2px solid #e2e8f0;
-            word-wrap: break-word;
-        }
-
-        .prediction-text {
-            color: #1a202c;
-            font-size: 32px;
-            letter-spacing: 2px;
-        }
-
-        .button-container {
+        /* Live detection card */
+        .detect-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px; padding: 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             text-align: center;
-            margin-top: 30px;
         }
+        .detect-label {
+            font-size: 11px; font-weight: 700; color: #a0aec0;
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+        }
+        .detect-char {
+            font-size: 96px; font-weight: 900; line-height: 1;
+            color: #4a90e2; min-height: 110px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .detect-char.empty { color: #e2e8f0; font-size: 60px; }
 
+        /* Hold progress */
+        .hold-wrap { margin-top: 14px; }
+        .hold-label {
+            font-size: 11px; color: #718096; font-weight: 600;
+            margin-bottom: 6px; text-align: left;
+        }
+        .hold-bar-bg {
+            background: #e2e8f0; border-radius: 6px; height: 10px; overflow: hidden;
+        }
+        .hold-bar {
+            height: 100%; border-radius: 6px; width: 0%;
+            background: linear-gradient(90deg, #4a90e2, #38b2ac);
+            transition: width 0.1s linear;
+        }
+        .hold-bar.full { background: linear-gradient(90deg, #38b2ac, #10b981); }
+
+        /* Predicted text card */
+        .text-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px; padding: 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .text-label {
+            font-size: 11px; font-weight: 700; color: #a0aec0;
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+        }
+        #prediction-box {
+            font-size: 22px; font-weight: 700; min-height: 60px;
+            padding: 14px 16px; background: #f7fafc;
+            border-radius: 12px; border: 2px solid #e2e8f0;
+            word-break: break-all; letter-spacing: 2px;
+            color: #1a202c; line-height: 1.4;
+        }
+        #prediction-box.empty { color: #cbd5e0; font-size: 15px; font-weight: 500; }
+
+        /* Buttons */
         .btn-clear {
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 12px;
-            background: #e53e3e;
-            border: none;
-            color: white;
-            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            width: 100%; padding: 14px; font-size: 16px; font-weight: 700;
+            border-radius: 12px; background: #e53e3e; border: none; color: white;
+            box-shadow: 0 4px 15px rgba(229,62,62,0.3); transition: all 0.3s; cursor: pointer;
         }
-
-        .btn-clear:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
-            background: #c53030;
-        }
-
+        .btn-clear:hover { transform: translateY(-2px); background: #c53030; box-shadow: 0 6px 20px rgba(229,62,62,0.4); }
         .btn-home {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            color: #4a5568;
-            text-decoration: none;
-            display: inline-block;
-            margin-right: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: block; text-align: center; padding: 11px;
+            font-size: 14px; font-weight: 600; border-radius: 12px;
+            background: white; border: 2px solid #e2e8f0; color: #4a5568;
+            text-decoration: none; transition: all 0.3s;
         }
+        .btn-home:hover { background: #f7fafc; color: #2d3748; transform: translateY(-1px); }
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
 
-        .btn-home:hover {
-            background: #f7fafc;
-            transform: translateY(-2px);
-            color: #2d3748;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        /* Tip card */
+        .tip-card {
+            background: linear-gradient(135deg, #ebf8ff, #e0f2fe);
+            border-radius: 16px; padding: 16px;
+            font-size: 13px; color: #2c5282; line-height: 1.6;
+            border: 1px solid #bee3f8;
         }
+        .tip-card strong { display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 
-        @media (max-width: 768px) {
-            .page-title h1 {
-                font-size: 32px;
-            }
-
-            #prediction {
-                font-size: 24px;
-            }
-
-            .video-container {
-                padding: 15px;
-            }
+        @media (max-width: 860px) {
+            .camera-layout { grid-template-columns: 1fr; }
+            .side-panel { display: grid; grid-template-columns: 1fr 1fr; }
+            .detect-char { font-size: 72px; min-height: 85px; }
+        }
+        @media (max-width: 540px) {
+            .side-panel { grid-template-columns: 1fr; }
+            .page-title h1 { font-size: 28px; }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">SignLanguage</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dataset">Dataset</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/camera">Camera</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dataset">Dataset</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/camera">Camera</a></li>
                 </ul>
             </div>
         </div>
@@ -228,143 +200,213 @@
     <div class="container-main">
         <div class="page-title">
             <h1>American Sign Language Detection</h1>
-            <p>Show your hand signs to the camera and see the predictions in real-time</p>
+            <p>Show a hand sign to the camera — hold it still for 1 second to add the letter</p>
         </div>
 
-        <div class="video-container">
-            <video id="webcam" autoplay playsinline muted style="width: 100%; max-width: 800px; border-radius: 15px; border: 3px solid #e2e8f0; margin: 0 auto; display: block;"></video>
-            <canvas id="canvas" style="display: none;"></canvas>
-            <img id="video-feed" src="" alt="Camera Feed" style="display: none; width: 100%; max-width: 800px; border-radius: 15px; border: 3px solid #e2e8f0; margin: 0 auto;">
-            <div id="camera-error" style="display: none; text-align: center; padding: 20px; color: #e53e3e;">
-                <p>Camera not available. Please check:</p>
-                <ul style="text-align: left; display: inline-block;">
-                    <li>Camera permissions are granted</li>
-                    <li>No other application is using the camera</li>
-                    <li>Camera is connected and working</li>
-                    <li>You are using HTTPS (or localhost)</li>
-                </ul>
+        <div id="status-bar" class="status-bar connecting">
+            <div class="status-dot"></div>
+            <span id="status-text">Starting camera...</span>
+        </div>
+
+        <div class="camera-layout">
+            <!-- Video -->
+            <div class="video-panel">
+                <div class="video-wrap">
+                    <video id="webcam" autoplay playsinline webkit-playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                    <img id="video-feed" alt="Processed Camera Feed">
+                    <div id="camera-error">
+                        <strong>Camera unavailable</strong>
+                        <ul>
+                            <li>Grant camera permission when prompted</li>
+                            <li>No other app is using the camera</li>
+                            <li>Use HTTPS or localhost</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="prediction-container">
-            <div class="prediction-label">Predicted Text</div>
-            <div id="prediction">
-                <span class="prediction-text" id="prediction-text">Waiting for detection...</span>
+            <!-- Side panel -->
+            <div class="side-panel">
+                <!-- Live detection -->
+                <div class="detect-card">
+                    <div class="detect-label">Detecting Now</div>
+                    <div class="detect-char empty" id="live-char">?</div>
+                    <div class="hold-wrap">
+                        <div class="hold-label" id="hold-label">Hold still to confirm</div>
+                        <div class="hold-bar-bg">
+                            <div class="hold-bar" id="hold-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accumulated text -->
+                <div class="text-card">
+                    <div class="text-label">Predicted Text</div>
+                    <div id="prediction-box" class="empty">Waiting for detection...</div>
+                </div>
+
+                <!-- Clear + home -->
+                <div class="action-buttons">
+                    <button type="button" class="btn-clear" onclick="clearText()">Clear Text</button>
+                    <a href="/" class="btn-home">&#8592; Back to Home</a>
+                </div>
+
+                <!-- Tip -->
+                <div class="tip-card">
+                    <strong>Tips for best results</strong>
+                    &bull; Good lighting on your hand<br>
+                    &bull; Keep hand within frame<br>
+                    &bull; Hold sign still for 1 second<br>
+                    &bull; Plain background works best
+                </div>
             </div>
-        </div>
-
-        <div class="button-container">
-            <a href="/" class="btn-home">← Back to Home</a>
-            <button class="btn-clear" onclick="clearText()">Clear Text</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        const predictionText = document.getElementById('prediction-text');
-        const video = document.getElementById('webcam');
-        const canvas = document.getElementById('canvas');
-        const videoFeed = document.getElementById('video-feed');
+        const webcam      = document.getElementById('webcam');
+        const canvas      = document.getElementById('canvas');
+        const videoFeed   = document.getElementById('video-feed');
         const cameraError = document.getElementById('camera-error');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
-        let isProcessing = false;
+        const statusBar   = document.getElementById('status-bar');
+        const statusText  = document.getElementById('status-text');
+        const liveChar    = document.getElementById('live-char');
+        const holdBar     = document.getElementById('hold-bar');
+        const holdLabel   = document.getElementById('hold-label');
+        const predBox     = document.getElementById('prediction-box');
+        const ctx         = canvas.getContext('2d', { willReadFrequently: true });
+
+        let isProcessing  = false;
+        let errorCount    = 0;
+
+        function setStatus(state, msg) {
+            statusBar.className = 'status-bar ' + state;
+            statusText.textContent = msg;
+        }
 
         async function setupCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
                     audio: false
                 });
-                video.srcObject = stream;
-                
-                return new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        resolve(video);
-                    };
+                webcam.srcObject = stream;
+                return new Promise(resolve => {
+                    webcam.onloadedmetadata = () => resolve(webcam);
                 });
             } catch (err) {
-                console.error("Error accessing camera: ", err);
+                console.error('Camera error:', err);
                 cameraError.style.display = 'block';
+                setStatus('error', 'Camera access denied');
                 return null;
             }
         }
 
         async function processFrame() {
-            if (!video.videoWidth || isProcessing) {
+            if (!webcam.videoWidth || isProcessing) {
                 requestAnimationFrame(processFrame);
                 return;
             }
 
             isProcessing = true;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Draw video to canvas (flip horizontally for mirror effect)
+            canvas.width  = webcam.videoWidth;
+            canvas.height = webcam.videoHeight;
+
+            // Mirror for natural feel
+            ctx.save();
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            
-            const imageData = canvas.toDataURL('image/jpeg', 0.6); // Compress to 60% quality for faster transfer
-            
+            ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.6);
+
             try {
-                const response = await fetch('/process_frame', {
+                const resp = await fetch('/process_frame', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: imageData })
                 });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    errorCount = 0;
+                    setStatus('active', 'Connected — show a hand sign');
+
+                    // Show annotated feed, hide raw webcam
                     if (data.image) {
                         videoFeed.src = data.image;
-                        if(videoFeed.style.display === 'none') {
-                            videoFeed.style.display = 'block';
-                            video.style.display = 'none'; // Hide raw webcam
-                        }
+                        videoFeed.style.display = 'block';
+                        webcam.style.display = 'none';
                     }
-                    
-                    if (data.prediction && data.prediction.trim() !== '') {
-                        predictionText.textContent = data.prediction;
-                        predictionText.style.color = '#1a202c';
+
+                    // Live character
+                    if (data.current_character) {
+                        liveChar.textContent = data.current_character.toUpperCase();
+                        liveChar.classList.remove('empty');
                     } else {
-                        predictionText.textContent = 'Waiting for detection...';
-                        predictionText.style.color = '#a0aec0';
+                        liveChar.textContent = '?';
+                        liveChar.classList.add('empty');
                     }
+
+                    // Hold progress bar
+                    const pct = Math.round((data.hold_progress || 0) * 100);
+                    holdBar.style.width = pct + '%';
+                    if (pct >= 100) {
+                        holdBar.classList.add('full');
+                        holdLabel.textContent = 'Confirmed!';
+                    } else if (pct > 0) {
+                        holdBar.classList.remove('full');
+                        holdLabel.textContent = 'Hold still… ' + pct + '%';
+                    } else {
+                        holdBar.classList.remove('full');
+                        holdLabel.textContent = 'Hold still to confirm';
+                    }
+
+                    // Accumulated text
+                    if (data.prediction && data.prediction.trim() !== '') {
+                        predBox.textContent = data.prediction.toUpperCase();
+                        predBox.classList.remove('empty');
+                    } else {
+                        predBox.textContent = 'Waiting for detection...';
+                        predBox.classList.add('empty');
+                    }
+                } else {
+                    throw new Error('HTTP ' + resp.status);
                 }
             } catch (err) {
-                console.error("Error processing frame: ", err);
+                errorCount++;
+                console.error('Frame error:', err);
+                if (errorCount > 5) {
+                    setStatus('error', 'Backend error — check console');
+                }
             }
-            
+
             isProcessing = false;
-            // Add a small delay between frames to avoid overwhelming the server
-            setTimeout(() => requestAnimationFrame(processFrame), 50);
+            setTimeout(() => requestAnimationFrame(processFrame), 80);
+        }
+
+        async function clearText() {
+            try {
+                await fetch('/clear_text', { method: 'POST' });
+                predBox.textContent = 'Waiting for detection...';
+                predBox.classList.add('empty');
+            } catch (e) {
+                console.error('Clear error:', e);
+            }
         }
 
         async function main() {
             const cam = await setupCamera();
             if (cam) {
                 cam.play();
+                setStatus('connecting', 'Camera ready — connecting to backend...');
                 processFrame();
             }
         }
 
-        // Clear the text field
-        async function clearText() {
-            try {
-                await fetch('/clear_text', { method: 'POST' });
-                predictionText.textContent = 'Waiting for detection...';
-                predictionText.style.color = '#a0aec0';
-            } catch (error) {
-                console.error('Error clearing text:', error);
-            }
-        }
-
-        // Initialize
         window.addEventListener('load', main);
     </script>
 </body>

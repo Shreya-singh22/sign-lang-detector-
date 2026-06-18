@@ -2,12 +2,11 @@ import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
-import threading
 import time
 import logging
 import os
 import base64
-from flask import Flask, render_template, jsonify, Response, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 
 app = Flask(__name__)
 
@@ -51,6 +50,26 @@ def index():
 def camera():
     return render_template('camera.html')  # Serve the camera page
 
+@app.route('/dataset')
+def dataset():
+    test_dir = os.path.join(os.path.dirname(__file__), 'Test')
+    folders = []
+    total_images = 0
+    if os.path.exists(test_dir):
+        for folder_name in sorted(os.listdir(test_dir)):
+            folder_path = os.path.join(test_dir, folder_name)
+            if os.path.isdir(folder_path):
+                images = [f for f in os.listdir(folder_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+                count = len(images)
+                total_images += count
+                folders.append({'name': folder_name, 'count': count, 'images': sorted(images)})
+    return render_template('dataset.html', folders=folders, total_images=total_images)
+
+@app.route('/dataset_image/<folder>/<filename>')
+def dataset_image(folder, filename):
+    test_dir = os.path.join(os.path.dirname(__file__), 'Test')
+    return send_from_directory(os.path.join(test_dir, folder), filename)
+
 @app.route('/get_prediction')
 def get_prediction():
     return jsonify({"prediction": predicted_text})
@@ -69,8 +88,7 @@ def process_frame():
         data = request.json
         if not data or 'image' not in data:
             return jsonify({'error': 'No image provided'}), 400
-        
-        # Decode the base64 image
+
         image_data = data['image']
         if ',' in image_data:
             image_data = image_data.split(',')[1]
@@ -85,11 +103,14 @@ def process_frame():
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)
 
-        data_aux = []
-        x_ = []
-        y_ = []
+        current_character = None
+        hold_progress = 0.0
 
         if results.multi_hand_landmarks:
+            data_aux = []
+            x_ = []
+            y_ = []
+
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_drawing.draw_landmarks(
                     frame,
@@ -100,64 +121,55 @@ def process_frame():
                 )
 
             for hand_landmarks in results.multi_hand_landmarks:
-                for i in range(len(hand_landmarks.landmark)):
-                    x = hand_landmarks.landmark[i].x
-                    y = hand_landmarks.landmark[i].y
+                for lm in hand_landmarks.landmark:
+                    x_.append(lm.x)
+                    y_.append(lm.y)
 
-                    x_.append(x)
-                    y_.append(y)
+                for lm in hand_landmarks.landmark:
+                    data_aux.append(lm.x - min(x_))
+                    data_aux.append(lm.y - min(y_))
 
-                for i in range(len(hand_landmarks.landmark)):
-                    x = hand_landmarks.landmark[i].x
-                    y = hand_landmarks.landmark[i].y
-                    data_aux.append(x - min(x_))
-                    data_aux.append(y - min(y_))
+                x1 = max(0, int(min(x_) * W) - 15)
+                y1 = max(0, int(min(y_) * H) - 15)
+                x2 = min(W, int(max(x_) * W) + 15)
+                y2 = min(H, int(max(y_) * H) + 15)
 
-                x1 = int(min(x_) * W) - 10
-                y1 = int(min(y_) * H) - 10
-                x2 = int(max(x_) * W) - 10
-                y2 = int(max(y_) * H) - 10
-
-                # Make prediction using the model
                 prediction = model.predict([np.asarray(data_aux)])
                 predicted_index = int(prediction[0])
 
-                # Filter out invalid predictions
                 if predicted_index in labels_dict:
-                    predicted_character = labels_dict[predicted_index]
-                else:
-                    predicted_character = None
+                    current_character = labels_dict[predicted_index]
 
-                # Draw a rectangle and the predicted character on the frame
-                if predicted_character:
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
-                    cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
-                                cv2.LINE_AA)
+                if current_character:
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (74, 144, 226), 3)
+                    label = current_character.upper()
+                    cv2.putText(frame, label, (x1, y1 - 12),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.4, (74, 144, 226), 3, cv2.LINE_AA)
 
-                    current_time = time.time()
-
-                    # Timer logic: Check if the predicted character is the same for more than 1 second
-                    if predicted_character == last_detected_character:
-                        if (current_time - start_time) >= 1.0:  # Class fixed after 1 second
-                            fixed_character = predicted_character
-                            if delayCounter == 0:  # Add character once after it stabilizes for 1 second
-                                predicted_text += fixed_character
-                                delayCounter = 1
+                    now = time.time()
+                    if current_character == last_detected_character:
+                        elapsed = now - start_time
+                        hold_progress = min(elapsed / 1.0, 1.0)
+                        if elapsed >= 1.0 and delayCounter == 0:
+                            predicted_text += current_character
+                            delayCounter = 1
                     else:
-                        # Reset the timer when a new character is detected
-                        start_time = current_time
-                        last_detected_character = predicted_character
+                        start_time = now
+                        last_detected_character = current_character
                         delayCounter = 0
+                        hold_progress = 0.0
 
-        # Encode frame back to base64
-        ret, buffer = cv2.imencode('.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
         encoded_image = base64.b64encode(buffer).decode('utf-8')
-        
+
         return jsonify({
             'image': 'data:image/jpeg;base64,' + encoded_image,
-            'prediction': predicted_text
+            'prediction': predicted_text,
+            'current_character': current_character,
+            'hold_progress': hold_progress
         })
     except Exception as e:
+        logging.error("process_frame error: %s", str(e))
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":

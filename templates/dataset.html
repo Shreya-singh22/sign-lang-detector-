@@ -9,11 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Montserrat', sans-serif;
@@ -25,6 +21,7 @@
 
         .navbar {
             background: rgba(255, 255, 255, 0.9);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             margin-bottom: 30px;
@@ -32,192 +29,182 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 24px;
-            color: #1a202c !important;
-        }
-
-        .navbar-toggler {
-            border: 2px solid #e2e8f0;
-        }
-
+        .navbar-brand { font-weight: 700; font-size: 24px; color: #1a202c !important; }
+        .navbar-toggler { border: 2px solid #e2e8f0; }
         .navbar-toggler-icon {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2842, 55, 72, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
+        .nav-link { color: #4a5568 !important; font-weight: 500; transition: all 0.3s ease; }
+        .nav-link:hover { color: #2d3748 !important; transform: translateY(-1px); }
+        .nav-link.active { color: #4a90e2 !important; font-weight: 600; }
 
-        .nav-link {
-            color: #4a5568 !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
+        .container-main { max-width: 1200px; margin: 0 auto; }
+
+        .page-title { text-align: center; margin-bottom: 30px; padding: 20px; }
+        .page-title h1 { font-size: 48px; font-weight: 800; color: #1a202c; margin-bottom: 10px; }
+        .page-title p { font-size: 18px; color: #4a5568; }
+
+        /* Kaggle source banner */
+        .source-banner {
+            background: linear-gradient(135deg, #20c997 0%, #0d9488 100%);
+            border-radius: 16px;
+            padding: 22px 30px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 6px 25px rgba(13, 148, 136, 0.25);
         }
-
-        .nav-link:hover {
-            color: #2d3748 !important;
-            transform: translateY(-1px);
+        .source-banner .source-info { display: flex; align-items: center; gap: 16px; }
+        .kaggle-icon {
+            width: 48px; height: 48px; background: white; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800; color: #20beff; flex-shrink: 0;
         }
-
-        .nav-link.active {
-            color: #4a90e2 !important;
-            font-weight: 600;
+        .source-banner h3 { color: white; font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+        .source-banner p { color: rgba(255,255,255,0.85); font-size: 13px; margin: 0; }
+        .btn-kaggle {
+            background: white; color: #0d9488; border: none;
+            padding: 10px 22px; border-radius: 10px; font-weight: 700;
+            font-size: 14px; text-decoration: none; white-space: nowrap;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
         }
+        .btn-kaggle:hover { background: #f0fdfa; color: #0f766e; transform: translateY(-1px); }
 
-        .container-main {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page-title {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
-
-        .page-title h1 {
-            font-size: 48px;
-            font-weight: 800;
-            color: #1a202c;
-            margin-bottom: 10px;
-        }
-
-        .page-title p {
-            font-size: 18px;
-            color: #4a5568;
-            font-weight: 400;
-        }
-
+        /* Stats */
         .stats-container {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            border-radius: 20px; padding: 28px 30px;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
         }
+        .stat-item { text-align: center; padding: 10px 30px; }
+        .stat-number { font-size: 38px; font-weight: 800; color: #4a90e2; display: block; }
+        .stat-label { font-size: 14px; color: #718096; margin-top: 4px; font-weight: 500; }
+        .stat-divider { width: 1px; background: #e2e8f0; margin: 10px 0; }
 
-        .stat-item {
-            display: inline-block;
-            margin: 0 30px;
-        }
-
-        .stat-number {
-            font-size: 36px;
-            font-weight: 800;
-            color: #4a90e2;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 16px;
-            color: #4a5568;
-            margin-top: 5px;
-        }
+        /* Dataset grid */
+        .section-title { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 18px; }
 
         .dataset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 16px;
             margin-bottom: 30px;
         }
 
         .dataset-card {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-align: center;
+            border-radius: 14px; padding: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.25s ease;
+            cursor: pointer; text-align: center;
+            border: 2px solid transparent;
         }
-
         .dataset-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.2);
+            border-color: #4a90e2;
         }
-
-        .dataset-card h3 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 10px;
+        .dataset-card .letter-badge {
+            font-size: 36px; font-weight: 800; color: #1a202c;
+            margin-bottom: 8px; line-height: 1;
         }
-
         .dataset-card .count {
-            font-size: 14px;
-            color: #4a5568;
-            margin-bottom: 15px;
+            font-size: 12px; color: #718096; margin-bottom: 10px; font-weight: 500;
+        }
+        .dataset-card .preview {
+            width: 100%; height: 110px; object-fit: cover;
+            border-radius: 8px; background: #e2e8f0;
+        }
+        .preview-placeholder {
+            width: 100%; height: 110px; border-radius: 8px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+            display: flex; align-items: center; justify-content: center;
+            color: #a0aec0; font-size: 13px; font-weight: 600;
+        }
+        .view-btn {
+            margin-top: 10px; font-size: 11px; color: #4a90e2;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        .dataset-card .preview {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            background: #e2e8f0;
+        /* Modal gallery */
+        .modal-content { border-radius: 20px; border: none; }
+        .modal-header { border-bottom: 1px solid #f0f0f0; padding: 20px 24px; }
+        .modal-title { font-weight: 700; font-size: 22px; }
+        .modal-body { padding: 24px; }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
         }
+        .gallery-img-wrap {
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .gallery-img-wrap img {
+            width: 100%; height: 140px; object-fit: cover; display: block;
+            transition: transform 0.2s;
+        }
+        .gallery-img-wrap img:hover { transform: scale(1.04); }
+        .modal-footer { border-top: 1px solid #f0f0f0; padding: 16px 24px; }
 
         .btn-back {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            color: #4a5568;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 12px 30px; font-size: 16px; font-weight: 600;
+            border-radius: 12px; background: white; border: 2px solid #e2e8f0;
+            color: #4a5568; text-decoration: none; display: inline-block;
+            transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
         .btn-back:hover {
-            background: #f7fafc;
-            transform: translateY(-2px);
-            color: #2d3748;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #f7fafc; transform: translateY(-2px);
+            color: #2d3748; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        .button-container { text-align: center; margin-top: 30px; }
 
-        .button-container {
-            text-align: center;
-            margin-top: 30px;
+        .btn-camera {
+            background: #4a90e2; border: none; border-radius: 10px;
+            font-weight: 600; color: white; padding: 8px 20px;
+            text-decoration: none; display: inline-block; transition: background 0.2s;
+        }
+        .btn-camera:hover { background: #3a7bd5; color: white; }
+
+        /* About section */
+        .about-card {
+            background: rgba(255,255,255,0.95); border-radius: 20px;
+            padding: 30px; margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .about-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 14px; color: #1a202c; }
+        .about-card p { color: #4a5568; line-height: 1.7; margin-bottom: 10px; font-size: 15px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .tag {
+            background: #ebf8ff; color: #2b6cb0; padding: 5px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: 600;
         }
 
         @media (max-width: 768px) {
-            .page-title h1 {
-                font-size: 32px;
-            }
-
-            .dataset-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-            }
-
-            .stat-item {
-                margin: 10px 15px;
-            }
+            .page-title h1 { font-size: 32px; }
+            .dataset-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .source-banner { flex-direction: column; text-align: center; }
+            .source-banner .source-info { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">SignLanguage</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/dataset">Dataset</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/camera">Camera</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/dataset">Dataset</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/camera">Camera</a></li>
                 </ul>
             </div>
         </div>
@@ -226,54 +213,134 @@
     <div class="container-main">
         <div class="page-title">
             <h1>Dataset Overview</h1>
-            <p>American Sign Language (ASL) dataset with 28 classes</p>
+            <p>American Sign Language (ASL) alphabet dataset — 28 classes</p>
         </div>
 
+        <!-- Kaggle Source Banner -->
+        <div class="source-banner">
+            <div class="source-info">
+                <div class="kaggle-icon">K</div>
+                <div>
+                    <h3>ASL Alphabet Dataset — Kaggle</h3>
+                    <p>87,000 images &bull; 29 classes &bull; 200×200 px &bull; by Akash (grassknoted)</p>
+                </div>
+            </div>
+            <a href="https://www.kaggle.com/datasets/grassknoted/asl-alphabet" target="_blank" rel="noopener noreferrer" class="btn-kaggle">
+                &#8599; View on Kaggle
+            </a>
+        </div>
+
+        <!-- Stats -->
         <div class="stats-container">
             <div class="stat-item">
                 <span class="stat-number">{{ folders|length }}</span>
                 <span class="stat-label">Classes</span>
             </div>
+            <div class="stat-divider"></div>
             <div class="stat-item">
                 <span class="stat-number">{{ total_images }}</span>
-                <span class="stat-label">Total Images</span>
+                <span class="stat-label">Test Images</span>
             </div>
+            <div class="stat-divider"></div>
             <div class="stat-item">
-                <span class="stat-number">A-Z</span>
-                <span class="stat-label">Alphabet Letters</span>
+                <span class="stat-number">87K</span>
+                <span class="stat-label">Full Dataset</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">200px</span>
+                <span class="stat-label">Image Size</span>
             </div>
         </div>
 
+        <!-- About Dataset -->
+        <div class="about-card">
+            <h2>About the Dataset</h2>
+            <p>
+                The <strong>ASL Alphabet</strong> dataset contains 87,000 images of American Sign Language hand gestures,
+                covering the 26 letters (A–Z) plus <em>Delete</em>, <em>Nothing</em>, and <em>Space</em> — 29 classes total.
+                Each class has 3,000 training images captured at 200×200 pixels under varying lighting and hand positions.
+            </p>
+            <p>
+                Our model was trained on this dataset using <strong>MediaPipe hand landmarks</strong> + a Random Forest classifier,
+                achieving real-time inference on live webcam input. Click any letter card below to browse sample images.
+            </p>
+            <div class="tag-list">
+                <span class="tag">Computer Vision</span>
+                <span class="tag">Sign Language</span>
+                <span class="tag">MediaPipe</span>
+                <span class="tag">Random Forest</span>
+                <span class="tag">Real-time Detection</span>
+                <span class="tag">ASL Alphabet</span>
+            </div>
+        </div>
+
+        <!-- Letter Cards Grid -->
+        <div class="section-title">Browse by Letter</div>
         <div class="dataset-grid">
             {% for folder in folders %}
-            <div class="dataset-card" onclick="showImages('{{ folder.name }}')">
-                <h3>{{ folder.name }}</h3>
+            <div class="dataset-card" onclick="openGallery('{{ folder.name }}', {{ folder.images | tojson }})">
+                <div class="letter-badge">{{ folder.name }}</div>
                 <div class="count">{{ folder.count }} images</div>
-                {% if folder.name != 'Nothing' and folder.name != 'Space' %}
-                    <img src="{{ url_for('dataset_image', folder=folder.name, filename='3001.jpg') }}" 
-                         alt="{{ folder.name }}" 
+                {% if folder.images %}
+                    <img src="{{ url_for('dataset_image', folder=folder.name, filename=folder.images[0]) }}"
+                         alt="Sign {{ folder.name }}"
                          class="preview"
-                         onerror="this.style.display='none'">
+                         onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'preview-placeholder', textContent: 'No preview'}))">
                 {% else %}
-                    <div class="preview" style="display: flex; align-items: center; justify-content: center; color: #a0aec0; font-size: 14px;">
-                        {{ folder.name }}
-                    </div>
+                    <div class="preview-placeholder">No images</div>
                 {% endif %}
+                <div class="view-btn">View gallery &rarr;</div>
             </div>
             {% endfor %}
         </div>
 
         <div class="button-container">
-            <a href="/" class="btn-back">← Back to Home</a>
+            <a href="/" class="btn-back">&#8592; Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="galleryModalLabel">Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="gallery-grid" id="galleryGrid"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="/camera" class="btn btn-camera">
+                        Try Live Detection &rarr;
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        function showImages(folder) {
-            alert('Showing images for: ' + folder + '\n\nThis feature can be extended to show all images in a gallery view.');
+        const modal = new bootstrap.Modal(document.getElementById('galleryModal'));
+
+        function openGallery(folder, images) {
+            document.getElementById('galleryModalLabel').textContent = 'Sign "' + folder + '" — Sample Images';
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+            images.forEach(function(filename) {
+                const wrap = document.createElement('div');
+                wrap.className = 'gallery-img-wrap';
+                const img = document.createElement('img');
+                img.src = '/dataset_image/' + encodeURIComponent(folder) + '/' + encodeURIComponent(filename);
+                img.alt = 'Sign ' + folder;
+                img.loading = 'lazy';
+                wrap.appendChild(img);
+                grid.appendChild(wrap);
+            });
+            modal.show();
         }
     </script>
 </body>
 </html>
-
