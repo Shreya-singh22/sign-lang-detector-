@@ -50,6 +50,10 @@ def index():
 def camera():
     return render_template('camera.html')  # Serve the camera page
 
+@app.route('/ping')
+def ping():
+    return jsonify({'status': 'ok'})
+
 @app.route('/dataset')
 def dataset():
     test_dir = os.path.join(os.path.dirname(__file__), 'Test')

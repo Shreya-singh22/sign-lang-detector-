@@ -398,13 +398,30 @@
             }
         }
 
+        async function wakeServer() {
+            setStatus('connecting', 'Waking up server — this takes ~30s on first visit...');
+            const start = Date.now();
+            while (true) {
+                try {
+                    const resp = await fetch('/ping', { method: 'GET' });
+                    if (resp.ok) {
+                        const secs = ((Date.now() - start) / 1000).toFixed(1);
+                        setStatus('connecting', 'Server ready (' + secs + 's) — starting detection...');
+                        return true;
+                    }
+                } catch (_) {}
+                await new Promise(r => setTimeout(r, 2000));
+                const elapsed = Math.round((Date.now() - start) / 1000);
+                setStatus('connecting', 'Waking up server… ' + elapsed + 's');
+            }
+        }
+
         async function main() {
             const cam = await setupCamera();
-            if (cam) {
-                cam.play();
-                setStatus('connecting', 'Camera ready — connecting to backend...');
-                processFrame();
-            }
+            if (!cam) return;
+            cam.play();
+            await wakeServer();
+            processFrame();
         }
 
         window.addEventListener('load', main);
