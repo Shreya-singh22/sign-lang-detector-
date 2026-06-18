@@ -311,17 +311,21 @@
             }
 
             isProcessing = true;
-            canvas.width  = webcam.videoWidth;
-            canvas.height = webcam.videoHeight;
 
-            // Mirror for natural feel
+            // Scale down to 320x240 — much faster on Render's free CPU
+            const W = 320, H = 240;
+            canvas.width  = W;
+            canvas.height = H;
+
             ctx.save();
-            ctx.translate(canvas.width, 0);
+            ctx.translate(W, 0);
             ctx.scale(-1, 1);
-            ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(webcam, 0, 0, W, H);
             ctx.restore();
 
-            const imageData = canvas.toDataURL('image/jpeg', 0.6);
+            const imageData = canvas.toDataURL('image/jpeg', 0.5);
+
+            setStatus('connecting', 'Processing frame…');
 
             try {
                 const resp = await fetch('/process_frame', {
@@ -330,8 +334,9 @@
                     body: JSON.stringify({ image: imageData })
                 });
 
+                const data = await resp.json();
+
                 if (resp.ok) {
-                    const data = await resp.json();
                     errorCount = 0;
                     setStatus('active', 'Connected — show a hand sign');
 
@@ -374,18 +379,19 @@
                         predBox.classList.add('empty');
                     }
                 } else {
-                    throw new Error('HTTP ' + resp.status);
+                    errorCount++;
+                    const msg = data.error || ('HTTP ' + resp.status);
+                    console.error('Frame error:', msg);
+                    setStatus('error', 'Error: ' + msg);
                 }
             } catch (err) {
                 errorCount++;
                 console.error('Frame error:', err);
-                if (errorCount > 5) {
-                    setStatus('error', 'Backend error — check console');
-                }
+                setStatus('error', 'Network error — ' + err.message);
             }
 
             isProcessing = false;
-            setTimeout(() => requestAnimationFrame(processFrame), 80);
+            setTimeout(() => requestAnimationFrame(processFrame), 100);
         }
 
         async function clearText() {
